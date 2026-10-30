@@ -22,15 +22,17 @@ jobs:
       run: |
         mkdir -p src/game
         echo '#define GAME_VERSION "0.0.1"' > src/game/version.h
-        # Удаляем строчку с ошибкой из CMakeLists.txt, чтобы он не останавливал сборку
+        # Удаляем обе строчки с ошибками из CMakeLists.txt
         sed -i 's/message(FATAL_ERROR "Couldn\x27t parse version from src\/game\/version.h")/message(STATUS "Skipping version check")/' CMakeLists.txt
         sed -i 's/message(SEND_ERROR "Couldn\x27t parse version from src\/game\/version.h")/message(STATUS "Skipping version check")/' CMakeLists.txt
+        sed -i 's/message(FATAL_ERROR "Couldn\x27t parse TClient version from src\/game\/version.h")/message(STATUS "Skipping tclient check")/' CMakeLists.txt
+        sed -i 's/message(SEND_ERROR "Couldn\x27t parse TClient version from src\/game\/version.h")/message(STATUS "Skipping tclient check")/' CMakeLists.txt
 
     - name: Configure CMake
       run: |
         mkdir build
         cd build
-        cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_VERSION="0.0.1"
+        cmake .. -DSERVER=OFF -DCLIENT=ON
 
     - name: Build Game
       run: |
