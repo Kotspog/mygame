@@ -13,10 +13,14 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Set up vcpkg (Library Manager)
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: '267215a3c94539da4fb4602db085f1c99859f774'
+    - name: Download Prebuilt DDNet Libraries
+      shell: bash
+      run: |
+        # Скачиваем официальные готовые Windows-библиотеки для DDNet
+        curl -L -o libs.zip https://github.com
+        unzip libs.zip
+        # Переносим их в нужную для сборки папку
+        mv ddnet-libs-master ddnet-libs
 
     - name: Force Rewrite Project Version and Missing Files
       shell: bash
@@ -26,12 +30,10 @@ jobs:
         mkdir -p other/versioninfo
         mkdir -p other/manifest
         
-        # Создаем файлы версий
+        # Создаем файлы версий и заглушки
         echo '#define GAME_VERSION "0.0.1"' > src/game/version.h
         echo '#define GAME_RELEASE_VERSION "0.0.1"' >> src/game/version.h
         touch cmake/checksummed_extra.txt
-        
-        # Создаем файлы-заглушки для иконок и манифеста Windows, которых не хватало
         touch other/versioninfo/versioninfo.rc.in
         touch other/manifest/client.manifest.in
         
@@ -48,7 +50,8 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
+        # Указываем CMake использовать скачанные готовые библиотеки
+        cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_PREFIX_PATH=../ddnet-libs
 
     - name: Build Game
       run: |
