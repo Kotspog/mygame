@@ -15,9 +15,7 @@ jobs:
 
     - name: Clone Prebuilt DDNet Libraries
       shell: bash
-      run: |
-        # Скачиваем официальные проверенные библиотеки для Windows x86_64
-        git clone --depth 1 https://github.com ddnet-libs
+      run: git clone --depth 1 https://github.com ddnet-libs
 
     - name: Force Rewrite Project Version and Missing Files
       shell: bash
@@ -32,15 +30,9 @@ jobs:
         touch other/versioninfo/versioninfo.rc.in
         touch other/manifest/client.manifest.in
         touch cmake/Download_GTest_CMakeLists.txt.in
-        
-        # Переписываем строчку project
         sed -i 's/project(.*)/project(DDNet VERSION "0.0.1" LANGUAGES C CXX)/g' CMakeLists.txt
-        
-        # Вырезаем капризную проверку файлов set_glob
         sed -i '/macro(set_glob/,/endmacro()/c\macro(set_glob)\nendmacro()' CMakeLists.txt
         sed -i '/function(set_glob/,/endfunction()/c\function(set_glob)\nendfunction()' CMakeLists.txt
-
-        # Вырезаем сломанную строчку установки config_retrieve в самом конце файла
         sed -i 's/install(TARGETS config_retrieve/# install(TARGETS config_retrieve/g' CMakeLists.txt
 
     - name: Configure CMake
@@ -48,12 +40,8 @@ jobs:
       run: |
         mkdir build
         cd build
-        # Подставляем прямые пути к скачанным библиотекам
         LIB_PATH="$(pwd)/../ddnet-libs/windows/x86_64"
-        cmake .. -DSERVER=OFF -DCLIENT=ON \
-          -DCMAKE_PREFIX_PATH="$LIB_PATH" \
-          -DCMAKE_LIBRARY_PATH="$LIB_PATH/lib" \
-          -DCMAKE_INCLUDE_PATH="$LIB_PATH/include"
+        cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_PREFIX_PATH="$LIB_PATH" -DCMAKE_LIBRARY_PATH="$LIB_PATH/lib" -DCMAKE_INCLUDE_PATH="$LIB_PATH/include"
 
     - name: Build Game
       run: |
