@@ -13,25 +13,32 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Install Dependencies
-      run: |
-        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+    - name: Set up vcpkg (Library Manager)
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: '267215a3c94539da4fb4602db085f1c99859f774'
 
     - name: Force Rewrite Project Version and Missing Files
       shell: bash
       run: |
         mkdir -p src/game
         mkdir -p cmake
+        mkdir -p other/versioninfo
+        mkdir -p other/manifest
+        
+        # Создаем файлы версий
         echo '#define GAME_VERSION "0.0.1"' > src/game/version.h
         echo '#define GAME_RELEASE_VERSION "0.0.1"' >> src/game/version.h
-        
-        # Создаем недостающий файл, из-за которого упала сборка
         touch cmake/checksummed_extra.txt
+        
+        # Создаем файлы-заглушки для иконок и манифеста Windows, которых не хватало
+        touch other/versioninfo/versioninfo.rc.in
+        touch other/manifest/client.manifest.in
         
         # Принудительно заменяем строчку project
         sed -i 's/project(.*)/project(DDNet VERSION "0.0.1" LANGUAGES C CXX)/g' CMakeLists.txt
         
-        # Отключаем остальные проверки
+        # Отключаем остальные жесткие проверки
         sed -i 's/message(FATAL_ERROR "Couldn\x27t parse version from src\/game\/version.h")/message(STATUS "Skipping version check")/' CMakeLists.txt
         sed -i 's/message(SEND_ERROR "Couldn\x27t parse version from src\/game\/version.h")/message(STATUS "Skipping version check")/' CMakeLists.txt
         sed -i 's/message(FATAL_ERROR "Couldn\x27t parse TClient version from src\/game\/version.h")/message(STATUS "Skipping tclient check")/' CMakeLists.txt
@@ -41,7 +48,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -DSERVER=OFF -DCLIENT=ON
+        cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_TOOLCHAIN_FILE=${{ github.workspace }}/vcpkg/scripts/buildsystems/vcpkg.cmake
 
     - name: Build Game
       run: |
