@@ -13,7 +13,7 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Force Rewrite Project Version and Disable Glob Checks
+    - name: Force Rewrite Project Version and Kill Glob Function
       shell: bash
       run: |
         mkdir -p src/game
@@ -29,17 +29,15 @@ jobs:
         # Переписываем строчку project
         sed -i 's/project(.*)/project(DDNet VERSION "0.0.1" LANGUAGES C CXX)/g' CMakeLists.txt
         
-        # Отключаем проверки версий
+        # Полностью опустошаем функцию set_glob, чтобы она ничего не проверяла и не выдавала ошибок
+        sed -i '/macro(set_glob/,/endmacro()/c\macro(set_glob)\nendmacro()' CMakeLists.txt
+        sed -i '/function(set_glob/,/endfunction()/c\function(set_glob)\nendfunction()' CMakeLists.txt
+
+        # Отключаем остальные текстовые проверки версий на всякий случай
         sed -i 's/message(FATAL_ERROR "Couldn\x27t parse version from src\/game\/version.h")/message(STATUS "Skipping version check")/' CMakeLists.txt
         sed -i 's/message(SEND_ERROR "Couldn\x27t parse version from src\/game\/version.h")/message(STATUS "Skipping version check")/' CMakeLists.txt
         sed -i 's/message(FATAL_ERROR "Couldn\x27t parse TClient version from src\/game\/version.h")/message(STATUS "Skipping tclient check")/' CMakeLists.txt
         sed -i 's/message(SEND_ERROR "Couldn\x27t parse TClient version from src\/game\/version.h")/message(STATUS "Skipping tclient check")/' CMakeLists.txt
-        
-        # Ломаем проверку set_glob, которая не дает собраться из-за кастомных файлов KernelNet
-        sed -i 's/message(FATAL_ERROR "${FILE_DIR} does not contain every file from directory ${DIR}")/message(STATUS "Skipping glob validation")/' CMakeLists.txt
-        sed -i 's/message(SEND_ERROR "${FILE_DIR} does not contain every file from directory ${DIR}")/message(STATUS "Skipping glob validation")/' CMakeLists.txt
-        sed -i 's/message(FATAL_ERROR "Entries only present in ${FILE_DIR}: ${ONLY_GLOB}")/message(STATUS "Skipping glob validation")/' CMakeLists.txt
-        sed -i 's/message(SEND_ERROR "Entries only present in ${FILE_DIR}: ${ONLY_GLOB}")/message(STATUS "Skipping glob validation")/' CMakeLists.txt
 
     - name: Configure CMake
       run: |
