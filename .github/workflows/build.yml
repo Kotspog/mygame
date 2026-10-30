@@ -1,0 +1,35 @@
+name: Build KernelNet
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Install Dependencies
+      run: |
+        choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake .. -DSERVER=OFF -DCLIENT=ON
+
+    - name: Build Game
+      run: |
+        cd build
+        cmake --build . --config Release
+
+    - name: Upload Finished Game
+      uses: actions/upload-artifact@v4
+      with:
+        name: KernelNet-Windows-Build
+        path: build/Release/
