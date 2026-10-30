@@ -15,9 +15,7 @@ jobs:
 
     - name: Clone Prebuilt DDNet Libraries
       shell: bash
-      run: |
-        # Скачиваем официальные библиотеки через Git напрямую, это не сломает файлы
-        git clone --depth 1 https://github.com ddnet-libs
+      run: git clone --depth 1 https://github.com ddnet-libs
 
     - name: Force Rewrite Project Version and Missing Files
       shell: bash
@@ -26,18 +24,12 @@ jobs:
         mkdir -p cmake
         mkdir -p other/versioninfo
         mkdir -p other/manifest
-        
-        # Создаем файлы версий и заглушки
         echo '#define GAME_VERSION "0.0.1"' > src/game/version.h
         echo '#define GAME_RELEASE_VERSION "0.0.1"' >> src/game/version.h
         touch cmake/checksummed_extra.txt
         touch other/versioninfo/versioninfo.rc.in
         touch other/manifest/client.manifest.in
-        
-        # Принудительно заменяем строчку project
         sed -i 's/project(.*)/project(DDNet VERSION "0.0.1" LANGUAGES C CXX)/g' CMakeLists.txt
-        
-        # Отключаем остальные жесткие проверки
         sed -i 's/message(FATAL_ERROR "Couldn\x27t parse version from src\/game\/version.h")/message(STATUS "Skipping version check")/' CMakeLists.txt
         sed -i 's/message(SEND_ERROR "Couldn\x27t parse version from src\/game\/version.h")/message(STATUS "Skipping version check")/' CMakeLists.txt
         sed -i 's/message(FATAL_ERROR "Couldn\x27t parse TClient version from src\/game\/version.h")/message(STATUS "Skipping tclient check")/' CMakeLists.txt
@@ -47,7 +39,6 @@ jobs:
       run: |
         mkdir build
         cd build
-        # Указываем CMake использовать правильно скачанные библиотеки
         cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_PREFIX_PATH=../ddnet-libs
 
     - name: Build Game
