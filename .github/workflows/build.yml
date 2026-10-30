@@ -39,7 +39,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_PREFIX_PATH=../ddnet-libs
+        cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_PREFIX_PATH=../ddnet-libs/windows/x86_64
 
     - name: Build Game
       run: |
