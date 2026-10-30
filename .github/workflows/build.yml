@@ -21,8 +21,8 @@ jobs:
       shell: bash
       run: |
         mkdir -p src/game
-        echo '#define GAME_VERSION "0.0.1"' > src/game/version.h
-        echo '#define GAME_RELEASE_VERSION "0.0.1"' >> src/game/version.h
+        echo '#define GAME_VERSION "20.2.1"' > src/game/version.h
+        echo '#define GAME_RELEASE_VERSION "20.2.1"' >> src/game/version.h
         
         # Жестко прописываем переменные версии в начало CMakeLists.txt
         sed -i '1i set(GAME_VERSION "0.0.1")' CMakeLists.txt
