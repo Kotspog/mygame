@@ -13,9 +13,9 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Clone Prebuilt DDNet Libraries
-      shell: bash
-      run: git clone --depth 1 https://github.com ddnet-libs
+    - name: Install Libraries via Vcpkg
+      run: |
+        vcpkg install sdl2 curl freetype libpng openssl sqlite3 wavpack opus opusfile --triplet x64-windows
 
     - name: Force Rewrite Project Version and Missing Files
       shell: bash
@@ -30,18 +30,20 @@ jobs:
         touch other/versioninfo/versioninfo.rc.in
         touch other/manifest/client.manifest.in
         touch cmake/Download_GTest_CMakeLists.txt.in
+        
+        # Переписываем строчку project
         sed -i 's/project(.*)/project(DDNet VERSION "0.0.1" LANGUAGES C CXX)/g' CMakeLists.txt
+        
+        # Вырезаем проверку set_glob под корень
         sed -i '/macro(set_glob/,/endmacro()/c\macro(set_glob)\nendmacro()' CMakeLists.txt
         sed -i '/function(set_glob/,/endfunction()/c\function(set_glob)\nendfunction()' CMakeLists.txt
         sed -i 's/install(TARGETS config_retrieve/# install(TARGETS config_retrieve/g' CMakeLists.txt
 
     - name: Configure CMake
-      shell: bash
       run: |
         mkdir build
         cd build
-        LIB_PATH="$(pwd)/../ddnet-libs/windows/x86_64"
-        cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_PREFIX_PATH="$LIB_PATH" -DCMAKE_LIBRARY_PATH="$LIB_PATH/lib" -DCMAKE_INCLUDE_PATH="$LIB_PATH/include"
+        cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
     - name: Build Game
       run: |
