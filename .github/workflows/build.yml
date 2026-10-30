@@ -13,10 +13,6 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Clone Prebuilt DDNet Libraries
-      shell: bash
-      run: git clone --depth 1 https://github.com ddnet-libs
-
     - name: Force Rewrite Project Version and Missing Files
       shell: bash
       run: |
@@ -39,7 +35,8 @@ jobs:
       run: |
         mkdir build
         cd build
-        cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_PREFIX_PATH=../ddnet-libs/windows/x86_64
+        # Включаем автоматическое скачивание библиотек самой DDNet
+        cmake .. -DSERVER=OFF -DCLIENT=ON -DDOWNLOAD_BUNDLED=ON -DUPDATE_BUNDLED=ON
 
     - name: Build Game
       run: |
