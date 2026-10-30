@@ -13,14 +13,11 @@ jobs:
       with:
         submodules: recursive
 
-    - name: Download Prebuilt DDNet Libraries
+    - name: Clone Prebuilt DDNet Libraries
       shell: bash
       run: |
-        # Скачиваем официальные готовые Windows-библиотеки для DDNet
-        curl -L -o libs.zip https://github.com
-        unzip libs.zip
-        # Переносим их в нужную для сборки папку
-        mv ddnet-libs-master ddnet-libs
+        # Скачиваем официальные библиотеки через Git напрямую, это не сломает файлы
+        git clone --depth 1 https://github.com ddnet-libs
 
     - name: Force Rewrite Project Version and Missing Files
       shell: bash
@@ -50,7 +47,7 @@ jobs:
       run: |
         mkdir build
         cd build
-        # Указываем CMake использовать скачанные готовые библиотеки
+        # Указываем CMake использовать правильно скачанные библиотеки
         cmake .. -DSERVER=OFF -DCLIENT=ON -DCMAKE_PREFIX_PATH=../ddnet-libs
 
     - name: Build Game
