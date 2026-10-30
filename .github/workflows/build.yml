@@ -17,24 +17,16 @@ jobs:
       run: |
         vcpkg install sdl2 curl freetype libpng openssl sqlite3 wavpack opus opusfile --triplet x64-windows
 
-    - name: Force Rewrite Project Version and Missing Files
+    - name: Create Missing Dummies
       shell: bash
       run: |
-        mkdir -p src/game
-        mkdir -p cmake
-        mkdir -p other/versioninfo
-        mkdir -p other/manifest
-        echo '#define GAME_VERSION "0.0.1"' > src/game/version.h
-        echo '#define GAME_RELEASE_VERSION "0.0.1"' >> src/game/version.h
+        mkdir -p cmake other/versioninfo other/manifest
         touch cmake/checksummed_extra.txt
         touch other/versioninfo/versioninfo.rc.in
         touch other/manifest/client.manifest.in
         touch cmake/Download_GTest_CMakeLists.txt.in
         
-        # Переписываем строчку project
-        sed -i 's/project(.*)/project(DDNet VERSION "0.0.1" LANGUAGES C CXX)/g' CMakeLists.txt
-        
-        # Вырезаем проверку set_glob под корень
+        # Вырезаем проверку файлов set_glob под корень, чтобы не падало из-за кастомных файлов
         sed -i '/macro(set_glob/,/endmacro()/c\macro(set_glob)\nendmacro()' CMakeLists.txt
         sed -i '/function(set_glob/,/endfunction()/c\function(set_glob)\nendfunction()' CMakeLists.txt
         sed -i 's/install(TARGETS config_retrieve/# install(TARGETS config_retrieve/g' CMakeLists.txt
