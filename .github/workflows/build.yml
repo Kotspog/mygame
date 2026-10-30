@@ -18,16 +18,16 @@ jobs:
         choco install cmake --installargs 'ADD_CMAKE_TO_PATH=System' -y
 
     - name: Fix Version File
+      shell: cmd
       run: |
-        mkdir -p src/game
-        echo '#define GAME_VERSION "0.0.1"' > src/game/version.h
-      shell: bash
+        mkdir src\game
+        echo #define GAME_VERSION "0.0.1" > src\game\version.h
 
     - name: Configure CMake
       run: |
         mkdir build
         cd build
-        cmake .. -DSERVER=OFF -DCLIENT=ON
+        cmake .. -DSERVER=OFF -DCLIENT=ON -DCLIENT_VERSION="0.0.1"
 
     - name: Build Game
       run: |
